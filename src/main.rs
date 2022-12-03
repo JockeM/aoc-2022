@@ -8,7 +8,7 @@ use std::process::Command;
 fn main() {
     let total: f64 = (1..=25)
         .map(|day| {
-            let day = format!("{:02}", day);
+            let day = format!("{day:02}");
 
             let cmd = Command::new("cargo")
                 .args(["run", "--release", "--bin", &day])
@@ -16,7 +16,7 @@ fn main() {
                 .unwrap();
 
             println!("----------");
-            println!("{}| Day {} |{}", ANSI_BOLD, day, ANSI_RESET);
+            println!("{ANSI_BOLD}| Day {day} |{ANSI_RESET}");
             println!("----------");
 
             let output = String::from_utf8(cmd.stdout).unwrap();
