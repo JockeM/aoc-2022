@@ -18,7 +18,7 @@ pub fn part_one(input: &str) -> Option<u32> {
                 let hs: HashSet<char> = HashSet::from_iter(a.chars());
                 b.chars().find(|c| hs.contains(c))
             })
-            .map(|c| get_value(c))
+            .map(get_value)
             .sum::<u32>(),
     )
 }
@@ -35,9 +35,9 @@ pub fn part_two(input: &str) -> Option<u32> {
                     .counts()
                     .iter()
                     .find(|&(_, &v)| v == 3)
-                    .map(|kv| kv.0.clone())
+                    .map(|kv| *kv.0)
             })
-            .map(|c| get_value(c))
+            .map(get_value)
             .sum::<u32>(),
     )
 }
