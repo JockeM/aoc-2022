@@ -1,6 +1,5 @@
-use std::vec;
-
 use itertools::Itertools;
+use std::vec;
 
 fn parse(input: &str) -> (Vec<Vec<char>>, Vec<(usize, usize, usize)>) {
     let (stacks_data, moves) = input.split_once("\n\n").unwrap();
@@ -28,7 +27,6 @@ fn parse(input: &str) -> (Vec<Vec<char>>, Vec<(usize, usize, usize)>) {
         .split('\n')
         .filter_map(|c| {
             c.split(' ')
-                .skip(1)
                 .filter_map(|x| x.parse::<usize>().ok())
                 .collect_tuple::<(usize, usize, usize)>()
         })
