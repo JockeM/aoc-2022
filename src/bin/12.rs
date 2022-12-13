@@ -1,11 +1,36 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 type Pos = (usize, usize);
 
+fn get_distance_walked(from: Pos, to: Pos, graph: HashMap<Pos, Vec<Pos>>) -> Option<u32> {
+    let mut visited = HashSet::new();
+    let mut queue = VecDeque::new();
+    queue.push_back((from, 0));
+
+    while let Some((pos, distance)) = queue.pop_front() {
+        if pos == to {
+            return Some(distance);
+        }
+        if visited.contains(&pos) {
+            continue;
+        }
+        visited.insert(pos);
+
+        if let Some(neighbors) = graph.get(&pos) {
+            for &neighbor in neighbors {
+                queue.push_back((neighbor, distance + 1));
+            }
+        }
+    }
+
+    None
+}
+
 fn can_walk(from: u8, to: u8) -> bool {
     match (from, to) {
-        (b'E', b'z') | (b'S', b'a') => true,
-        (f, t) => f < t,
+        (b'z', b'E') | (b'S', b'a') => true,
+        (b'S', _) | (b'E', _) | (_, b'S') | (_, b'E') => false,
+        (f, t) => f + 1 >= t,
     }
 }
 
@@ -36,16 +61,15 @@ pub fn part_one(input: &str) -> Option<u32> {
             if x > 0 && can_walk(c, data[y][x - 1]) {
                 neighbors.push((x - 1, y));
             }
-            if x + 1 < y_len && can_walk(c, data[y][x + 1]) {
+            if x + 1 < x_len && can_walk(c, data[y][x + 1]) {
                 neighbors.push((x + 1, y));
             }
+
             graph.insert((x, y), neighbors);
         }
     }
 
-    println!("start: {start:?} end:{end:?}");
-    dbg!(graph);
-    Some(1)
+    get_distance_walked(start, end, graph)
 }
 
 pub fn part_two(_input: &str) -> Option<u32> {
