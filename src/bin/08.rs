@@ -60,9 +60,7 @@ pub fn part_two(input: &str) -> Option<u32> {
 
 fn main() {
     let input = &advent_of_code::read_file("inputs", 8);
-    for _ in 0..100 {
-        advent_of_code::solve!(1, part_one, input);
-    }
+    advent_of_code::solve!(1, part_one, input);
     advent_of_code::solve!(2, part_two, input);
 }
 
