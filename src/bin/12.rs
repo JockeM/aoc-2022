@@ -1,4 +1,5 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::{collections::{HashMap, HashSet, VecDeque}};
+use itertools::Itertools;
 
 type Pos = (usize, usize);
 
@@ -69,6 +70,14 @@ pub fn part_one(input: &str) -> Option<u32> {
         }
     }
 
+    for (p, n) in graph.clone().iter().sorted() {
+        print!("{p:?} [");
+        for s in n {
+            print!("{s:?} ");
+        } 
+        println!("]");
+    }
+
     get_distance_walked(start, end, graph)
 }
 
@@ -85,6 +94,17 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_can_walk() {
+        assert!(!can_walk(b'a', b'z'));
+        assert!(!can_walk(b'a', b'S'));
+        assert!(!can_walk(b'S', b'b'));
+        assert!(!can_walk(b'E', b'z'));
+        assert!(can_walk(b'S', b'a'));
+        assert!(can_walk(b'b', b'a'));
+        assert!(can_walk(b'z', b'E'));
+    }
 
     #[test]
     fn test_part_one() {
