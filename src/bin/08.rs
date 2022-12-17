@@ -1,3 +1,5 @@
+use itertools::FoldWhile::{Continue, Done};
+use itertools::Itertools;
 use std::collections::HashSet;
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -55,7 +57,72 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let data: Vec<Vec<i8>> = input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|x| x.to_digit(10).unwrap() as i8)
+                .collect()
+        })
+        .collect();
+
+    let y_len = data.len();
+    let x_len = data[0].len();
+    let mut best: u32 = 0;
+
+    for start_y in 0..y_len {
+        for start_x in 0..x_len {
+            let c = data[start_y][start_x];
+
+            let right = (start_x + 1..x_len)
+                .into_iter()
+                .fold_while(0, |acc, x| {
+                    if c > data[start_y][x] {
+                        Continue(acc + 1)
+                    } else {
+                        Done(acc + 1)
+                    }
+                })
+                .into_inner();
+            let left = (0..start_x)
+                .into_iter()
+                .rev()
+                .fold_while(0, |acc, x| {
+                    if c > data[start_y][x] {
+                        Continue(acc + 1)
+                    } else {
+                        Done(acc + 1)
+                    }
+                })
+                .into_inner();
+            let top = (0..start_y)
+                .into_iter()
+                .rev()
+                .fold_while(0, |acc, y| {
+                    if c > data[y][start_x] {
+                        Continue(acc + 1)
+                    } else {
+                        Done(acc + 1)
+                    }
+                })
+                .into_inner();
+            let bot = (start_y + 1..y_len)
+                .into_iter()
+                .fold_while(0, |acc, x| {
+                    if c > data[x][start_x] {
+                        Continue(acc + 1)
+                    } else {
+                        Done(acc + 1)
+                    }
+                })
+                .into_inner();
+            if left * right * top * bot > best {
+                best = left * right * top * bot;
+            }
+        }
+    }
+
+    Some(best)
 }
 
 fn main() {
@@ -68,15 +135,15 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_part_one() {
-        let input = advent_of_code::read_file("examples", 8);
-        assert_eq!(part_one(&input), Some(21));
-    }
+    //#[test]
+    //fn test_part_one() {
+    //    let input = advent_of_code::read_file("examples", 8);
+    //    assert_eq!(part_one(&input), Some(21));
+    //}
 
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 8);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(8));
     }
 }
