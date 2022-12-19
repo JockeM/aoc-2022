@@ -1,4 +1,7 @@
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::{
+    cmp::Ordering,
+    collections::{BinaryHeap, HashMap, HashSet},
+};
 
 type Cord = [i8; 3];
 
@@ -67,34 +70,58 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(count)
 }
 
+#[derive(Copy, Clone, Eq, PartialEq)]
+struct State {
+    cost: u32,
+    position: Cord,
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.cost.cmp(&self.cost)
+    }
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
 fn is_outside(cord: Cord, blocked: &HashSet<Cord>, cache: &mut HashSet<Cord>) -> bool {
     let mut heap = BinaryHeap::new();
     let mut distances = HashMap::new();
     let mut visited = HashSet::new();
 
-    heap.push((0, cord));
+    heap.push(State {
+        cost: 0,
+        position: cord,
+    });
     distances.insert(cord, 0);
 
-    while let Some((cost, pos)) = heap.pop() {
-        if pos == [0, 0, 0] || cache.contains(&pos) {
+    while let Some(State { cost: _, position }) = heap.pop() {
+        if position == [0, 0, 0] || cache.contains(&position) {
             cache.extend(visited);
             return true;
         }
-        if visited.contains(&pos) {
+        if visited.contains(&position) {
             continue;
         }
-        visited.insert(pos);
+        visited.insert(position);
 
         for dir in &SIDES {
-            let next = add(&pos, dir);
+            let next = add(&position, dir);
             if blocked.contains(&next) || visited.contains(&next) {
                 continue;
             }
-            let new_cost = cost + 1;
+            let new_cost = position[0] as u32 ^ 2 + position[1] as u32 ^ 2 + position[2] as u32 ^ 2;
             let distance = distances.entry(next).or_insert(new_cost);
             if new_cost <= *distance {
                 *distance = new_cost;
-                heap.push((new_cost, next));
+                heap.push(State {
+                    cost: new_cost,
+                    position: next,
+                });
             }
         }
     }
