@@ -1,31 +1,37 @@
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
-use itertools::Itertools;
+type Cord = [i8; 3];
 
-const SIDES: [(i8, i8, i8); 6] = [
-    (-1, 0, 0),
-    (1, 0, 0),
-    (0, -1, 0),
-    (0, 1, 0),
-    (0, 0, -1),
-    (0, 0, 1),
+const SIDES: [Cord; 6] = [
+    [-1, 0, 0],
+    [1, 0, 0],
+    [0, -1, 0],
+    [0, 1, 0],
+    [0, 0, -1],
+    [0, 0, 1],
 ];
 
+fn add(a: &Cord, b: &Cord) -> Cord {
+    [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
+}
+
 pub fn part_one(input: &str) -> Option<u32> {
-    let data: HashSet<(i8, i8, i8)> = input
+    let data: HashSet<Cord> = input
         .lines()
         .map(|line| {
-            line.split(',')
-                .map(|n| n.parse().unwrap())
-                .collect_tuple()
-                .unwrap()
+            let mut it = line.split(',');
+            [
+                it.next().unwrap().parse().unwrap(),
+                it.next().unwrap().parse().unwrap(),
+                it.next().unwrap().parse().unwrap(),
+            ]
         })
         .collect();
 
     let mut count = 0;
-    for (x, y, z) in &data {
-        for (sx, sy, sz) in &SIDES {
-            if !data.contains(&(x + sx, y + sy, z + sz)) {
+    for pos in &data {
+        for dir in &SIDES {
+            if !data.contains(&add(pos, dir)) {
                 count += 1;
             }
         }
@@ -35,22 +41,24 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let data: HashSet<(i8, i8, i8)> = input
+    let data: HashSet<Cord> = input
         .lines()
         .map(|line| {
-            line.split(',')
-                .map(|n| n.parse().unwrap())
-                .collect_tuple()
-                .unwrap()
+            let mut it = line.split(',');
+            [
+                it.next().unwrap().parse().unwrap(),
+                it.next().unwrap().parse().unwrap(),
+                it.next().unwrap().parse().unwrap(),
+            ]
         })
         .collect();
 
     let mut count = 0;
     let mut cache = HashSet::new();
-    for (x, y, z) in &data {
-        for (sx, sy, sz) in &SIDES {
-            let pos = (x + sx, y + sy, z + sz);
-            if !data.contains(&pos) && dijkstra(pos, (0, 0, 0), &data, &mut cache) {
+    for pos in &data {
+        for dir in &SIDES {
+            let pos = add(pos, dir);
+            if !data.contains(&pos) && is_outside(pos, &data, &mut cache) {
                 count += 1;
             }
         }
@@ -59,31 +67,26 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(count)
 }
 
-fn dijkstra(
-    start: (i8, i8, i8),
-    end: (i8, i8, i8),
-    blocked: &HashSet<(i8, i8, i8)>,
-    cache: &mut HashSet<(i8, i8, i8)>,
-) -> bool {
+fn is_outside(cord: Cord, blocked: &HashSet<Cord>, cache: &mut HashSet<Cord>) -> bool {
     let mut heap = BinaryHeap::new();
     let mut distances = HashMap::new();
     let mut visited = HashSet::new();
 
-    heap.push((0, start));
-    distances.insert(start, 0);
+    heap.push((0, cord));
+    distances.insert(cord, 0);
 
-    while let Some((cost, position)) = heap.pop() {
-        if position == end || cache.contains(&position) {
+    while let Some((cost, pos)) = heap.pop() {
+        if pos == [0, 0, 0] || cache.contains(&pos) {
             cache.extend(visited);
             return true;
         }
-        if visited.contains(&position) {
+        if visited.contains(&pos) {
             continue;
         }
-        visited.insert(position);
+        visited.insert(pos);
 
-        for (sx, sy, sz) in SIDES {
-            let next = (position.0 + sx, position.1 + sy, position.2 + sz);
+        for dir in &SIDES {
+            let next = add(&pos, dir);
             if blocked.contains(&next) || visited.contains(&next) {
                 continue;
             }
