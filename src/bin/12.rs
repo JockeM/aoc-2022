@@ -48,24 +48,22 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 fn build_graph(data: &HashMap<Pos, u8>) -> HashMap<Pos, Vec<Pos>> {
-    let mut graph = HashMap::new();
-    for (pos, from) in data {
-        let mut neighbors = vec![];
-        const SIDES: [(i8, i8); 4] = [(0, -1), (0, 1), (-1, 0), (1, 0)];
-        for (dx, dy) in SIDES {
-            let pos = (pos.0 + dx as usize, pos.1 + dy as usize);
-            if data
-                .get(&pos)
-                .map(|to| can_walk(*from, *to))
-                .unwrap_or(false)
-            {
-                neighbors.push(pos);
-            }
-        }
+    const SIDES: [(i8, i8); 4] = [(0, -1), (0, 1), (-1, 0), (1, 0)];
+    data.iter()
+        .map(|(pos, from)| {
+            let neighbors: Vec<Pos> = SIDES
+                .iter()
+                .map(|&(dx, dy)| (pos.0 + dx as usize, pos.1 + dy as usize))
+                .filter(|&pos| {
+                    data.get(&pos)
+                        .map(|to| can_walk(*from, *to))
+                        .unwrap_or(false)
+                })
+                .collect();
 
-        graph.insert(*pos, neighbors);
-    }
-    graph
+            (*pos, neighbors)
+        })
+        .collect()
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
